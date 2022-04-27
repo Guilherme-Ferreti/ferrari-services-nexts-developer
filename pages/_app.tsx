@@ -1,5 +1,5 @@
 import '../assets/sass/main.scss';
-import type { AppProps } from 'next/app'
+import type { AppProps } from 'next/app';
 import MenuProvider from '../contexts/MenuContext';
 
 function MyApp({ Component, pageProps }: AppProps) {
@@ -7,7 +7,7 @@ function MyApp({ Component, pageProps }: AppProps) {
     <MenuProvider>
       <Component {...pageProps} />
     </MenuProvider>
-  )
+  );
 }
 
-export default MyApp
+export default MyApp;
