@@ -55,7 +55,7 @@ const Contact = () => {
             <div className="alert danger">
               {Object.keys(errors).map((key) => (
                 <Fragment key={key}>
-                  {get(errors, `{$key}.message`, 'Confira as informações')}{' '}
+                  {get(errors, `${key}.message`, 'Confira as informações')}{' '}
                   &nbsp;
                 </Fragment>
               ))}

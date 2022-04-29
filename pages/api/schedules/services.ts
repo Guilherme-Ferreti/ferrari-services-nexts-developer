@@ -8,16 +8,25 @@ export default withIronSessionApiRoute(async function (
   res: NextApiResponse,
 ) {
   try {
+    const services = req.body.services
+      .map((id: any) => +id)
+      .filter((id: number) => !isNaN(id));
+
     const schedule = {
       ...(req.session.schedule ?? {}),
-      timeOptionId: req.body.timeOptionId,
+      services,
     } as ScheduleSession;
+
+    if (services.length === 0) {
+      res.status(400).json({
+        message: 'Escolha um serviço',
+      });
+      return;
+    }
 
     req.session.schedule = schedule;
 
     await req.session.save();
-
-    res.status(200).json(req.session.schedule);
   } catch (e: any) {
     res.status(400).json({
       message: e.message,

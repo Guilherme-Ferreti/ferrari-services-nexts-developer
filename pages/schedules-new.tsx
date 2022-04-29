@@ -2,7 +2,7 @@ import { Fragment, useCallback, useState } from 'react';
 import Calendar from '../components/Calendar';
 import Header from '../components/Header';
 import Page from '../components/Page';
-import Footer, { ButtonBack, ButtonContinue } from '../components/Page/Footer';
+import Footer from '../components/Page/Footer';
 import { format } from 'date-fns';
 import axios from 'axios';
 import { useRouter } from 'next/router';
