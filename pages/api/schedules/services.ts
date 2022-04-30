@@ -19,7 +19,7 @@ export default withIronSessionApiRoute(async function (
 
     if (services.length === 0) {
       res.status(400).json({
-        message: 'Escolha um serviço',
+        message: 'Escolha um serviço.',
       });
       return;
     }
@@ -27,6 +27,8 @@ export default withIronSessionApiRoute(async function (
     req.session.schedule = schedule;
 
     await req.session.save();
+
+    res.status(200).json(req.session.schedule);
   } catch (e: any) {
     res.status(400).json({
       message: e.message,

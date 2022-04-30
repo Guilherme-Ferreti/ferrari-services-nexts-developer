@@ -1,5 +1,8 @@
+import axios from 'axios';
+import { get } from 'lodash';
 import { NextPage } from 'next';
-import { ChangeEvent } from 'react';
+import { useRouter } from 'next/router';
+import { ChangeEvent, Fragment, useEffect } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import Header from '../components/Header';
 import Page from '../components/Page';
@@ -8,17 +11,27 @@ import Panel from '../components/Page/Schedule/Panel';
 import ScheduleServiceProvider, {
   useScheduleService,
 } from '../components/Page/Schedule/ScheduleServiceContext';
+import Toast from '../components/Toast';
 import { formatCurrency } from '../utils/formatCurrency';
 
 type FormData = {
   services: Number[];
+  server?: unknown;
 };
 
 const ScheduleServicePage = () => {
-  const { services, addSelectedService, removeSelectedService } =
+  const { services, selecteds, addSelectedService, removeSelectedService } =
     useScheduleService();
 
-  const { handleSubmit } = useForm<FormData>();
+  const {
+    handleSubmit,
+    setValue,
+    setError,
+    formState: { errors },
+    clearErrors,
+  } = useForm<FormData>();
+
+  const router = useRouter();
 
   const onChangeService = (checked: boolean, serviceId: number) => {
     if (checked) {
@@ -29,8 +42,37 @@ const ScheduleServicePage = () => {
   };
 
   const save: SubmitHandler<FormData> = ({ services }) => {
-    console.log(services);
+    if (services.length === 0) {
+      setError('services', {
+        type: 'required',
+        message: 'Escolha um serviço.',
+      });
+
+      return false;
+    }
+
+    axios
+      .post('/api/schedules/services', {
+        services,
+      })
+      .then(() => router.push('/schedules-payment'))
+      .catch((error) => {
+        setError('server', {
+          message: error.response?.data.message ?? error.message,
+        });
+      });
   };
+
+  useEffect(() => {
+    setValue(
+      'services',
+      selecteds.map((service) => service.id),
+    );
+
+    if (selecteds.length > 0) {
+      clearErrors();
+    }
+  }, [selecteds, setValue, clearErrors]);
 
   return (
     <Page
@@ -65,6 +107,18 @@ const ScheduleServicePage = () => {
             </label>
           ))}
         </div>
+
+        <Toast
+          type="danger"
+          open={Object.keys(errors).length > 0}
+          onClose={clearErrors}
+        >
+          {Object.keys(errors).map((key) => (
+            <Fragment key={key}>
+              {get(errors, `${key}.message`, 'Confira os serviços.')} &nbsp;
+            </Fragment>
+          ))}
+        </Toast>
 
         <Footer />
       </form>
