@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { addMonths, format } from 'date-fns';
-import { GetServerSidePropsContext, NextPage } from 'next';
+import { GetServerSidePropsContext, NextPage, Redirect } from 'next';
 import { Fragment, useEffect, useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { IMaskInput } from 'react-imask';
@@ -14,8 +14,7 @@ import CreditCard from '../components/CreditCard';
 import { get } from 'lodash';
 import axios from 'axios';
 import { useRouter } from 'next/router';
-import { sessionOptions } from '../utils/session';
-import { withIronSessionSsr } from 'iron-session/next';
+import { withAuthentication } from '../utils/withAuthentication';
 
 type ScheduleCreate = {
   installments: number;
@@ -248,7 +247,7 @@ const ComponentPage: NextPage<ComponentPageProps> = ({ amount }) => {
     <Fragment>
       <Header />
       <Page
-        color="blue"
+        pageColor="blue"
         title="Dados do Cartão de Crédito"
         id="schedules-payment"
       >
@@ -391,20 +390,27 @@ type PaymentResponse = {
   amount: number;
 };
 
-export const getServerSideProps = withIronSessionSsr(
+export const getServerSideProps = withAuthentication(
   async ({ req }: GetServerSidePropsContext) => {
-    const { data } = await axios.get<PaymentResponse>(`/payment`, {
-      baseURL: process.env.API_URL,
-      params: {
-        services: req.session.schedule.services?.toString(),
-      },
-    });
+    try {
+      const { data } = await axios.get<PaymentResponse>(`/payment`, {
+        baseURL: process.env.API_URL,
+        params: {
+          services: req.session.schedule.services?.toString(),
+        },
+      });
 
-    return {
-      props: {
-        amount: String(data.amount),
-      } as ComponentPageProps,
-    };
+      return {
+        props: {
+          amount: String(data.amount),
+        } as ComponentPageProps,
+      };
+    } catch (e: any) {
+      return {
+        redirect: {
+          destination: '/schedules-services',
+        } as Redirect,
+      };
+    }
   },
-  sessionOptions,
 );

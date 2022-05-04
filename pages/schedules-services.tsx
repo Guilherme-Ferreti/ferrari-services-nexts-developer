@@ -1,25 +1,25 @@
 import axios from 'axios';
-import { get } from 'lodash';
 import { NextPage } from 'next';
-import { useRouter } from 'next/router';
-import { ChangeEvent, Fragment, useEffect } from 'react';
-import { SubmitHandler, useForm } from 'react-hook-form';
+import { useEffect } from 'react';
 import Header from '../components/Header';
 import Page from '../components/Page';
 import Footer from '../components/Page/Footer';
-import Panel from '../components/Page/Schedule/Panel';
-import ScheduleServiceProvider, {
-  useScheduleService,
-} from '../components/Page/Schedule/ScheduleServiceContext';
 import Toast from '../components/Toast';
 import { formatCurrency } from '../utils/formatCurrency';
+import Panel from '../components/Schedule/Panel';
+import ScheduleServiceProvider, {
+  useScheduleService,
+} from '../components/Schedule/ScheduleServiceContext';
+import { SubmitHandler, useForm } from 'react-hook-form';
+import { get } from 'lodash';
+import { useRouter } from 'next/router';
 
 type FormData = {
-  services: Number[];
+  services: number[];
   server?: unknown;
 };
 
-const ScheduleServicePage = () => {
+const SchedulesServicesPage = () => {
   const { services, selecteds, addSelectedService, removeSelectedService } =
     useScheduleService();
 
@@ -30,7 +30,6 @@ const ScheduleServicePage = () => {
     formState: { errors },
     clearErrors,
   } = useForm<FormData>();
-
   const router = useRouter();
 
   const onChangeService = (checked: boolean, serviceId: number) => {
@@ -45,17 +44,14 @@ const ScheduleServicePage = () => {
     if (services.length === 0) {
       setError('services', {
         type: 'required',
-        message: 'Escolha um serviço.',
+        message: 'Escolha pelo menos um serviço.',
       });
-
       return false;
     }
 
     axios
-      .post('/api/schedules/services', {
-        services,
-      })
-      .then(() => router.push('/schedules-payment'))
+      .post('/api/schedules/services', { services })
+      .then(() => router.push('/schedules-addresses'))
       .catch((error) => {
         setError('server', {
           message: error.response?.data.message ?? error.message,
@@ -76,9 +72,9 @@ const ScheduleServicePage = () => {
 
   return (
     <Page
+      pageColor="blue"
+      title="Escolha os Serviços"
       id="schedules-services"
-      color="blue"
-      title="Escolha os serviços"
       panel={<Panel />}
     >
       <form onSubmit={handleSubmit(save)}>
@@ -92,9 +88,9 @@ const ScheduleServicePage = () => {
                 type="checkbox"
                 name="service"
                 value={id}
-                onChange={(event: ChangeEvent<HTMLInputElement>) =>
-                  onChangeService(event.target.checked, +id)
-                }
+                onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                  onChangeService(event.target.checked, Number(id));
+                }}
               />
               <div className="square">
                 <div></div>
@@ -111,13 +107,15 @@ const ScheduleServicePage = () => {
         <Toast
           type="danger"
           open={Object.keys(errors).length > 0}
-          onClose={clearErrors}
+          onClose={() => clearErrors()}
         >
-          {Object.keys(errors).map((key) => (
-            <Fragment key={key}>
-              {get(errors, `${key}.message`, 'Confira os serviços.')} &nbsp;
-            </Fragment>
-          ))}
+          {Object.keys(errors).map((err) =>
+            get(
+              errors,
+              `${err}.message`,
+              'Verifique os serviços selecionados.',
+            ),
+          )}
         </Toast>
 
         <Footer />
@@ -130,7 +128,7 @@ const ComponentPage: NextPage = () => {
   return (
     <ScheduleServiceProvider>
       <Header />
-      <ScheduleServicePage />
+      <SchedulesServicesPage />
     </ScheduleServiceProvider>
   );
 };
