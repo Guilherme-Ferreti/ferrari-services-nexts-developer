@@ -6,7 +6,7 @@ import {
   useEffect,
   useState,
 } from 'react';
-import { ScheduleService } from '../../../../types/ScheduleService';
+import { ScheduleService } from '../../../types/ScheduleService';
 
 type ScheduleServiceContextProps = {
   services: ScheduleService[];

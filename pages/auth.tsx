@@ -1,13 +1,13 @@
 import { NextPage } from 'next';
 import Link from 'next/link';
-import AuthProvider, { useAuth } from '../components/Auth/AuthContext';
+import { useAuth } from '../components/Auth/AuthContext';
 import FormEmail from '../components/Auth/FormEmail';
 import FormForget from '../components/Auth/FormForget';
 import FormLogin from '../components/Auth/FormLogin';
 import FormRegister from '../components/Auth/FormRegister';
 import FormReset from '../components/Auth/FormReset';
 
-const AuthMain = () => {
+const ComponentPage: NextPage = () => {
   const { currentForm } = useAuth();
 
   return (
@@ -28,14 +28,6 @@ const AuthMain = () => {
         <p>2020 © Hcode. All rights reserved.</p>
       </section>
     </main>
-  );
-};
-
-const ComponentPage: NextPage = () => {
-  return (
-    <AuthProvider>
-      <AuthMain />
-    </AuthProvider>
   );
 };
 
