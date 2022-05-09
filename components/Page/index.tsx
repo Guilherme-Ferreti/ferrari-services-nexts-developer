@@ -1,21 +1,22 @@
 import { ReactNode } from 'react';
 
-type PageColors = 'blue' | 'green' | 'yellow';
+type PageColor = 'blue' | 'green' | 'yellow' | 'red';
 
 type PageProps = {
   children: ReactNode;
-  title: string;
+  title: string | ReactNode;
   id: string;
-  color: PageColors;
+  pageColor?: PageColor;
   panel?: ReactNode;
 };
 
-const Page = ({ children, title, id, color, panel }: PageProps) => {
+const Page = ({ children, title, id, pageColor, panel }: PageProps) => {
   return (
-    <section id={id} className={['page', color].join(' ')}>
+    <section id={id} className={['page', pageColor].join(' ')}>
       <header>
         <h1>{title}</h1>
       </header>
+
       <main>{children}</main>
 
       {panel && panel}

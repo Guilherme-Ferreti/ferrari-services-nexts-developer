@@ -6,11 +6,11 @@ import {
   useEffect,
   useState,
 } from 'react';
-import { ScheduleService } from '../../../types/ScheduleService';
+import { Service } from '../../../types/Service';
 
 type ScheduleServiceContextProps = {
-  services: ScheduleService[];
-  selecteds: ScheduleService[];
+  services: Service[];
+  selecteds: Service[];
   addSelectedService: (serviceId: number) => void;
   removeSelectedService: (serviceId: number) => void;
 };
@@ -27,8 +27,8 @@ export default function ScheduleServiceProvider({
 }: {
   children: ReactNode;
 }) {
-  const [services, setServices] = useState<ScheduleService[]>([]);
-  const [selecteds, setSelecteds] = useState<ScheduleService[]>([]);
+  const [services, setServices] = useState<Service[]>([]);
+  const [selecteds, setSelecteds] = useState<Service[]>([]);
 
   const addSelectedService = (serviceId: number) => {
     const service = services.find((service) => service.id === serviceId);
@@ -39,16 +39,16 @@ export default function ScheduleServiceProvider({
   };
 
   const removeSelectedService = (serviceId: number) => {
-    const service = selecteds.find((service) => service.id === serviceId);
+    const service = services.find((service) => service.id === serviceId);
 
     if (service) {
-      setSelecteds(selecteds.filter((item) => item.id !== serviceId));
+      setSelecteds(selecteds.filter((item) => item.id !== service.id));
     }
   };
 
   const loadServices = () => {
     axios
-      .get<ScheduleService[]>('/services', {
+      .get<Service[]>(`/services`, {
         baseURL: process.env.API_URL,
       })
       .then(({ data }) => setServices(data));
@@ -67,12 +67,10 @@ export default function ScheduleServiceProvider({
 
 export function useScheduleService() {
   const context = useContext(ScheduleServiceContext);
-
   if (!context) {
     throw new Error(
       'useScheduleService must be used within a ScheduleServiceProvider',
     );
   }
-
   return context;
 }
