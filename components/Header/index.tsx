@@ -1,8 +1,10 @@
 import Link from 'next/link';
 import { useMenu } from '../../contexts/MenuContext';
+import { useAuth } from '../Auth/AuthContext';
 
 const Header = () => {
   const { setIsOpen } = useMenu();
+  const { user, logout } = useAuth();
 
   return (
     <header id="header">
@@ -35,7 +37,7 @@ const Header = () => {
           />
         </svg>
       </button>
-      <div className="menu logged">
+      <div className={['menu', user ? 'logged' : ''].join(' ')}>
         <nav>
           <button
             type="button"
@@ -99,19 +101,24 @@ const Header = () => {
           <hr />
           <div>
             <picture>
-              <a href="#">
-                <img src="/images/user.png" alt="João Rangel" />
-              </a>
+              <Link href="/profile">
+                <a>
+                  <img
+                    src={`${process.env.API_URL}/photo/${user?.photo}`}
+                    alt={user?.person?.name}
+                  />
+                </a>
+              </Link>
             </picture>
             <div>
-              <Link href="#">
+              <Link href="/profile">
                 <a>
-                  <strong>João Rangel</strong>
-                  <small>joao@hcode.com.br</small>
+                  <strong>{user?.person?.name}</strong>
+                  <small>{user?.email}</small>
                 </a>
               </Link>
             </div>
-            <button type="button" aria-label="botao">
+            <button type="button" aria-label="botao" onClick={logout}>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="24"
@@ -131,6 +138,7 @@ const Header = () => {
           </Link>
         </div>
       </div>
+
       <hr className="italy" />
     </header>
   );

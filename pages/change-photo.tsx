@@ -11,13 +11,13 @@ import { Cropper } from 'react-cropper';
 import Header from '../components/Header';
 import Page from '../components/Page';
 import Footer from '../components/Page/Footer';
-import Title from '../components/Page/Title';
 import Toast from '../components/Toast';
 import { MeResponse } from '../types/MeResponse';
 import { User } from '../types/User';
 import { redirectToAuth } from '../utils/redirectToAuth';
 import { withAuthentication } from '../utils/withAuthentication';
 import 'cropperjs/dist/cropper.css';
+import { useAuth } from '../components/Auth/AuthContext';
 
 type ComponentPageProps = {
   token: string;
@@ -33,6 +33,8 @@ const ComponentPage: NextPage<ComponentPageProps> = ({ token, user }) => {
   const [photo, setPhoto] = useState('');
   const [error, setError] = useState('');
 
+  const { user: stateUser, setUser } = useAuth();
+
   const onSubmit = useCallback(
     (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
@@ -41,7 +43,7 @@ const ComponentPage: NextPage<ComponentPageProps> = ({ token, user }) => {
       const cropper = imgElement?.cropper;
 
       if (!cropper) {
-        setError('Seelcione uma foto.');
+        setError('Selecione uma foto.');
         return false;
       }
 
@@ -50,20 +52,23 @@ const ComponentPage: NextPage<ComponentPageProps> = ({ token, user }) => {
       }
 
       cropper.getCroppedCanvas().toBlob((blob: Blob) => {
-        console.log(blob);
-
         const formData = new FormData();
 
         formData.append('file', blob, 'photo.png');
 
         axios
-          .put(`/auth/photo`, formData, {
+          .put<User>(`/auth/photo`, formData, {
             baseURL: process.env.API_URL,
             headers: {
               Authorization: `Bearer ${token}`,
             },
           })
-          .then(() => {
+          .then(({ data: { photo } }) => {
+            user.photo = photo;
+            setUser({
+              ...stateUser!,
+              photo,
+            });
             setPhoto('');
             setToastType('success');
             setToastOpen(true);
@@ -117,8 +122,6 @@ const ComponentPage: NextPage<ComponentPageProps> = ({ token, user }) => {
     <Fragment>
       <Header />
       <Page title={'Mudar Foto'} id="change-photo">
-        <Title value="Informe a sua Senha" />
-
         <form onSubmit={onSubmit}>
           {photo && (
             <Cropper
